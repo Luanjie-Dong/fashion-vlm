@@ -12,7 +12,7 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
 
 
 ## Technical Implementations
-- **VLM Dataset prepration** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/dataloader.pyb)
+- **VLM Dataset prepration** - [View Code](https://github.com/Luanjie-Dong/fashion-vlm/blob/main/src/training/dataloader.py)
     - Reformatted a fashion dataset (Fashionpedia) for attribute extraction fine-tuning. - [code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/notebooks/preprocess_data.ipynb) 
     - Added a standardized prompt: 
      ```text
