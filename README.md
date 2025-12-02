@@ -51,3 +51,4 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
 - hugging face paligemma finetuning example - https://github.com/huggingface/notebooks/tree/main/examples/paligemma
 - youtube paligemma finetuning for json example - https://www.youtube.com/watch?v=hDa-M91MSGU
 - optimising training on single gpu - https://huggingface.co/docs/transformers/v4.42.0/perf_train_gpu_one
+- FashionPedia dataset link - https://www.kaggle.com/competitions/imaterialist-fashion-2020-fgvc7/overview
