@@ -1,36 +1,25 @@
-# Fashion Recommender
+# 👗 VLM Fashion Attribute Extractor
 
 ## Overview
-Advanced fashion recommendation system that combines Vision-Language Models (VLM) with graph-based embeddings to provide personalized outfit recommendations. The system understands clothing attributes from images and suggests compatible items based on both visual semantics and stylistic compatibility.
+Using a fine-tuned Vision-Language Model (VLM) to automatically extract detailed garment and outfit attributes directly from fashion images. 
 
 ## Features
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **VLM Attribute Extraction** | Extract detailed clothing attributes and generate multimodal embeddings from images |  In Progress |
-| **Graph-Based Compatibility** | Fashion item graph with learned compatibility relationships using Siamese networks | In Progress|
-| **Personalized Recommendations** | Hybrid recommendations combining user profiles with vector and graph search | In Progress |
-| **Multimodal Embedding Search** | Combined text and image embeddings for semantic fashion search | In Progress |
+| **VLM Attribute Extraction** | Extracts a structured, granular list of attributes (e.g., dress: a-line, floral, midi) and their properties from input images using a fine-tuned $\text{PaliGemma}$ model. | **✅ Completed** |
+| **Efficient Fine-Tuning** | Uses LoRA (Low-Rank Adaptation) for faster, resource-efficient fine-tuning on the $\text{FashionPedia}$ dataset. | **✅ Completed** |
+| **Semantic Fashion Search** | Leverages generated embeddings for semantic similarity search, allowing users to find visually and textually similar items based on extracted attributes. | **🚧 In Progress** |
+
 
 ## Technical Implementations
-- **VLM Processing Pipeline** - [View Code](src/vlm_processor.py)
-  - Utilizes BLIP-2/FashionCLIP for attribute extraction from images
-  - VLM model is finetuned on Deep Fashion multimodal dataset
-  - Generates both text and image embeddings for comprehensive item representation
-  - Implements multimodal embedding fusion for robust semantic understanding
+- **VLM Processing Pipeline** - [View Code]()
+  - Utilizes PaliGemma for attribute extraction from images
+  - VLM model is finetuned on FashionPedia multimodal dataset
+    - LoRA used for faster finetuning
+    - flash attention mode used for faster forward and backward pass
 
-- **Compatibility Graph Engine** - [View Code](src/graph_engine.py)
-  - Constructs fashion item nodes with category and attribute metadata
-  - Implements Siamese networks trained on Polyvore outfit dataset
-  - Supports both rule-based and learned compatibility relationships
 
-- **Hybrid Recommendation System** - [View Code](src/recommender.py)
-  - Combines vector similarity search with graph traversal
-  - Integrates user profile vectors for personalized results
-  - Implements diversity-aware ranking for varied recommendations
 
-## References
-- [Polyvore Dataset](https://github.com/xthan/polyvore-dataset) - Outfit compatibility dataset
-- [DeepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html) - Multimodal Clothing attribute dataset
 
 <!-- ## Implementation Phases
 - Phase 1: Build Foundation
@@ -52,3 +41,6 @@ Advanced fashion recommendation system that combines Vision-Language Models (VLM
     - Add style-based personalization
     - Optimize ranking with diversity -->
 
+# References 
+- hugging face paligemma finetuning example - https://github.com/huggingface/notebooks/blob/main/examples/paligemma/Fine_tune_PaliGemma.ipynb
+- optimising training on single gpu - https://huggingface.co/docs/transformers/v4.42.0/perf_train_gpu_one
