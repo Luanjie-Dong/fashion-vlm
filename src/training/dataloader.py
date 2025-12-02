@@ -67,6 +67,11 @@ def load_dataset():
 
     train_df, temp_df = train_test_split(df,test_size=0.2,random_state=42,shuffle=False)
     val_df, test_df = train_test_split(temp_df,test_size=0.5,random_state=42,shuffle=False)
+
+    #reduce size of val and test for faster training & eval on a single gpu
+    val_df = val_df.sample(n=100,random_state=42)
+    test_df = test_df.sample(n=10,random_state=42)
+
     train_dataset , val_dataset , test_dataset = FashionDataset(train_df,img_dir), FashionDataset(val_df,img_dir), FashionDataset(test_df,img_dir)
 
     print(f"Total: {len(df):,}")
@@ -78,32 +83,3 @@ def load_dataset():
         FashionDataset(test_df, img_dir),
     )
 
-
-# training_args = TrainingArguments(
-#     output_dir="./results",
-#     num_train_epochs=10,
-#     per_device_train_batch_size=2,
-#     per_device_eval_batch_size=2,
-#     gradient_accumulation_steps=4,
-#     learning_rate=2e-4,
-#     bf16=True,
-#     logging_steps=100,
-#     save_strategy="epoch",
-#     evaluation_strategy="epoch",           # 🔑 Required for early stopping
-#     eval_steps=1,                          # or omit if using "epoch"
-#     load_best_model_at_end=True,           # 🔑 Loads best checkpoint (by val_loss)
-#     metric_for_best_model="eval_loss",     # 🔑 Lower is better
-#     greater_is_better=False,               # 🔑 Because loss should decrease
-#     optim="adamw_torch",
-#     gradient_checkpointing=True,
-#     remove_unused_columns=False,
-# )
-
-# trainer = Trainer(
-#     model=model,
-#     args=training_args,
-#     train_dataset=train_dataset,
-#     eval_dataset=val_dataset,              # 🔑 Must provide validation set
-#     data_collator=partial(train_data_collator, processor=processor),
-#     callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],  # 🔑 Stop after 3 epochs w/o improvement
-# )

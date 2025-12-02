@@ -1,3 +1,6 @@
 /fashion-env
 data
 models
+*.pyc
+/src/training/__pycache__
+src/training/__pycache__/dataloader.cpython-311.pyc

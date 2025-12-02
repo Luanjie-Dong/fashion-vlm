@@ -1,22 +1,27 @@
 # 👗 VLM Fashion Attribute Extractor
 
 ## Overview
-Using a fine-tuned Vision-Language Model (VLM) to automatically extract detailed garment and outfit attributes directly from fashion images. 
+This project leverages a fine-tuned Vision-Language Model (VLM) to automatically extract detailed, structured attributes of garments and outfits directly from fashion images. It provides rich visual understanding for downstream applications such as semantic search, recommendation, or catalog enrichment.
+
 
 ## Features
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **VLM Attribute Extraction** | Extracts a structured, granular list of attributes (e.g., dress: a-line, floral, midi) and their properties from input images using a fine-tuned $\text{PaliGemma}$ model. | **✅ Completed** |
-| **Efficient Fine-Tuning** | Uses LoRA (Low-Rank Adaptation) for faster, resource-efficient fine-tuning on the $\text{FashionPedia}$ dataset. | **✅ Completed** |
-| **Semantic Fashion Search** | Leverages generated embeddings for semantic similarity search, allowing users to find visually and textually similar items based on extracted attributes. | **🚧 In Progress** |
+| **VLM Attribute Extraction** | Extracts a structured, granular list of fashion attributes (e.g., `dress: a-line, floral, midi`) from input images using a fine-tuned **PaliGemma** model. | ✅ Completed      |
+| **Semantic Fashion Search**  | Uses generated embeddings to power semantic similarity search—enabling retrieval of visually and textually similar items based on extracted attributes. | 🚧 In Progress    |
 
 
 ## Technical Implementations
-- **VLM Processing Pipeline** - [View Code]()
-  - Utilizes PaliGemma for attribute extraction from images
-  - VLM model is finetuned on FashionPedia multimodal dataset
-    - LoRA used for faster finetuning
-    - flash attention mode used for faster forward and backward pass
+- **VLM Dataset prepration** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/dataloader.pyb)
+    - Reformatted a fashion dataset (Fashionpedia) for attribute extraction fine-tuning. - [code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/notebooks/preprocess_data.ipynb) 
+    - Added a standardized prompt: 
+     ```text
+    <image> Describe all garments and their attributes in this image.
+    - Implemented a custom Dataset and DataLoader to efficiently batch and encode multimodal inputs (images + text prompts) and corresponding labels.
+- **VLM Finetuning** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/train.py)
+    - Fine-tuned google/paligemma2-3b-pt-224 for fashion attribute extraction.
+    - Applied LoRA (Low-Rank Adaptation) for parameter-efficient training.
+    - Utilized a FlashAttention-enabled version of PaliGemma to accelerate training and reduce memory overhead.
 
 
 
