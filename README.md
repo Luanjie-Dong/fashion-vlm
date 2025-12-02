@@ -17,6 +17,7 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
     - Added a standardized prompt: 
      ```text
     <image> Describe all garments and their attributes in this image.
+    ```
     - Implemented a custom Dataset and DataLoader to efficiently batch and encode multimodal inputs (images + text prompts) and corresponding labels.
 - **VLM Finetuning** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/train.py)
     - Fine-tuned google/paligemma2-3b-pt-224 for fashion attribute extraction.
