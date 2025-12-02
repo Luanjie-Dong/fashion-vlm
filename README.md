@@ -21,7 +21,7 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
     - Implemented a custom Dataset and DataLoader to efficiently batch and encode multimodal inputs (images + text prompts) and corresponding labels.
 - **VLM Finetuning** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/train.py)
     - Fine-tuned google/paligemma2-3b-pt-224 for fashion attribute extraction.
-    - Applied LoRA (Low-Rank Adaptation) for parameter-efficient training.
+    - Applied LoRA (Low-Rank Adaptation) for parameter-efficient training on a single GPU.
     - Utilized a FlashAttention-enabled version of PaliGemma to accelerate training and reduce memory overhead.
 
 
