@@ -22,6 +22,10 @@ processor = AutoProcessor.from_pretrained(MODEL_BASE,use_fast=True)
 
 
 def extract_attribute(image, prompt="Describe all garments and their attributes in this image."):
+    if image is None:
+        print("No image provided")
+        return "Please upload an image first."
+    
     model.eval()
     
     print('Extracting attribute of fashion image!')
@@ -35,48 +39,87 @@ def extract_attribute(image, prompt="Describe all garments and their attributes 
         ).to(model.device)
         
         generation_config = {
-            'max_new_tokens': 50,     
-            'num_beams': 1,             
-            'do_sample': False,         
+            'max_new_tokens': 150,     
             'pad_token_id': processor.tokenizer.pad_token_id,
             'eos_token_id': processor.tokenizer.eos_token_id,
             'use_cache': True,
-            'output_scores': False,     
         }
 
 
 
-        output_ids = model.generate(**model_input, **generation_config)
-        result = processor.decode(output_ids[0], skip_special_tokens=True)
-        result = result.replace(prompt, "").strip()
-        
-        return result
+        try:
+            print('Generating output')
+            output_ids = model.generate(**model_input, **generation_config)
+
+            print('Decoding output_ids:')
+            result = processor.decode(output_ids[0], skip_special_tokens=True)
+
+            print('Result is:',result)
+            result = result.replace(prompt, "").strip()
+            
+            if not result or result.isspace():
+                return "Could not extract attributes. Try a different image."
+            
+            print(result)
+            return result
+            
+        except Exception as e:
+            print(f"Error during generation: {e}")
+            return f"Error processing image: {str(e)}"
 
 # -------------------------------
 # Gradio interface
 # -------------------------------
-with gr.Blocks(title="Fashion VLM - Clothing Analyzer") as demo:
-    gr.Markdown("# 👗 Fashion VLM - Clothing Analyzer")
-    gr.Markdown("Upload a fashion image to get detailed analysis of fashion item attributes!")
-
+with gr.Blocks(title="Fashion Analyzer") as demo:
+    gr.Markdown("# 👗 Fashion Clothing Analyzer")
+    gr.Markdown("Upload an image to analyze clothing attributes!")
+    
     with gr.Row():
-        input_image = gr.Image(
-            type="pil", 
-            label="📷 Upload Fashion Image",
-            scale=1
-        )
         
-        output_textbox = gr.Textbox(
-            label="🧥 Fashion Analysis",
-            scale=1,
-            lines=10 
-        )
-
-    # Attach the function to the components
-    input_image.change(
-        fn=extract_attribute,
-        inputs=input_image,
-        outputs=output_textbox
+        with gr.Column():
+            image_input = gr.Image(
+                label="Upload Image",
+                type="pil",
+                height=500
+            )
+            
+            with gr.Row():
+                analyze_btn = gr.Button("Analyze", variant="primary", size="lg")
+                clear_btn = gr.Button("Clear", variant="secondary")
+        
+        with gr.Column():
+            # Output
+            output_box = gr.Textbox(
+                label="Analysis Results",
+                lines=10,
+                interactive=False
+            )
+            status = gr.Markdown("Ready")
+    
+    
+    async def analyze_image(img):
+        if img is None:
+            return "Please upload an image first.", "⚠️ No image"
+        
+        
+        result = extract_attribute(img)
+        
+        return result, "✅ Analysis complete" 
+    
+    def clear():
+        return None, "", "Ready"
+    
+    analyze_btn.click(
+        fn=analyze_image,
+        inputs=image_input,
+        outputs=[output_box, status],
+        concurrency_limit=1
+    )
+    
+    clear_btn.click(
+        fn=clear,
+        inputs=[],
+        outputs=[image_input, output_box, status]
     )
 
 if __name__ == "__main__":

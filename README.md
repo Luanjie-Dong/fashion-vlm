@@ -1,4 +1,5 @@
 # 👗 VLM Fashion Attribute Extractor
+![Fashion Example](./images/gradio-example.png)
 
 ## Overview
 This project leverages a fine-tuned Vision-Language Model (VLM) to automatically extract detailed, structured attributes of garments and outfits directly from fashion images. It provides rich visual understanding for downstream applications such as semantic search, recommendation, or catalog enrichment.
