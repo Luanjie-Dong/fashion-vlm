@@ -6,12 +6,12 @@ from functools import partial
 from peft import get_peft_model, LoraConfig
 import evaluate
 from tqdm import tqdm
+from utils import *
 
 class FashionTrainer(Trainer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.eval_metric = evaluate.load("bleu")
 
     def evaluate(self, eval_dataset=None, ignore_keys=None):
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
@@ -42,23 +42,23 @@ class FashionTrainer(Trainer):
                 
                 references = batch['answers']
                 
-                predictions = [p.strip() for p in predictions]
-                references = [[r.strip()] for r in references]
-                
                 all_predictions.extend(predictions)
                 all_references.extend(references)
         
-        bleu_result = self.eval_metric.compute(
-            predictions=all_predictions,
-            references=all_references
-        )
+        bleu_refs = [[r] for r in all_references]  
+        bleu_result = evaluate_attributes_bleu(all_predictions, bleu_refs)
+        quantified_result = evaluate_attributes(all_predictions, all_references)
         
         metrics = {
             f"eval_bleu": bleu_result["bleu"],
+            'eval_f1':quantified_result['f1'],
+            'eval_recall':quantified_result['recall'],
+            'eval_precision':quantified_result['precision'],
+
         }
         
         self.log(metrics)
-        print(f"BLEU Score: {bleu_result['bleu']:.4f}")
+        print(metrics)
         return metrics
 
 
@@ -100,13 +100,10 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
-        
-    steps_per_epoch = 36463 // (2 * 4)  
-    max_steps = steps_per_epoch * 3 
 
     args = TrainingArguments(
         output_dir="../../models/paligemma-fashion",
-        max_steps=max_steps,            
+        max_steps=1000,            
         per_device_train_batch_size=2,
         per_device_eval_batch_size=2,
         gradient_accumulation_steps=4,
@@ -115,10 +112,10 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
         eval_steps=100,     
         logging_steps=100,
         save_strategy="steps",
-        save_steps=1000,     
+        save_steps=100,     
 
         load_best_model_at_end=True,
-        metric_for_best_model="eval_bleu",
+        metric_for_best_model="eval_f1",
         greater_is_better=True,
 
         bf16=True,
@@ -135,7 +132,7 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=CustomCollator(processor),
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=2,early_stopping_threshold=0.01)],
         processing_class=processor
     )
 

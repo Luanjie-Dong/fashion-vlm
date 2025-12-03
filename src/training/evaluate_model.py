@@ -6,6 +6,7 @@ from dataloader import *
 from peft import PeftModel
 from functools import partial
 from torch.utils.data import DataLoader
+from utils import *
 
 
 
@@ -16,6 +17,7 @@ def evaluate(model, processor, test_dataset, device="cuda"):
 
     smoothie = SmoothingFunction().method4
     bleu_scores = []
+    f1_scores = []
 
     test_dataloader = DataLoader(test_dataset,collate_fn=partial(eval_collate_fn, processor=processor),batch_size=2,shuffle=True)
     print(f"Starting evaluation on {len(test_dataloader)} batches... \n")
@@ -40,17 +42,23 @@ def evaluate(model, processor, test_dataset, device="cuda"):
             )
 
             for pred , true in zip(generated_texts,answers):
+                print(f"Predicted: {pred}")
+                print(f"Answer:    {true}")
+
                 pred_tokens = pred.strip().split()
                 true_tokens = [true.strip().split()]  
                 if len(pred_tokens) == 0:
                     bleu = 0.0
                 else:
                     bleu = sentence_bleu(true_tokens, pred_tokens, smoothing_function=smoothie)
-                bleu_scores.append(bleu)
 
-                print(f"Predicted: {pred}")
-                print(f"Answer:    {true}")
-                print(f"BLEU:      {bleu:.4f}\n")
+                f1_score = evaluate_attributes([pred],[true])['f1']
+                bleu_scores.append(bleu)
+                f1_scores.append(f1_scores)
+
+                
+                print(f"BLEU:      {bleu:.4f}")
+                print(f"F1:         {f1_score:.4f}\n")
         
         if i == 2:
             break
