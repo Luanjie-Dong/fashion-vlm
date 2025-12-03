@@ -70,9 +70,9 @@ def extract_attribute(image, prompt="Describe all garments and their attributes 
 # -------------------------------
 # Gradio interface
 # -------------------------------
-with gr.Blocks(title="Fashion Analyzer") as demo:
-    gr.Markdown("# 👗 Fashion Clothing Analyzer")
-    gr.Markdown("Upload an image to analyze clothing attributes!")
+with gr.Blocks(title="Fashion VLM") as demo:
+    gr.Markdown("# 👗 Fashion Clothing Extraction")
+    gr.Markdown("Upload an image to extract clothing attributes!")
     
     with gr.Row():
         
@@ -90,7 +90,7 @@ with gr.Blocks(title="Fashion Analyzer") as demo:
         with gr.Column():
             # Output
             output_box = gr.Textbox(
-                label="Analysis Results",
+                label="Extraction Results",
                 lines=10,
                 interactive=False
             )
@@ -104,7 +104,7 @@ with gr.Blocks(title="Fashion Analyzer") as demo:
         
         result = extract_attribute(img)
         
-        return result, "✅ Analysis complete" 
+        return result, "✅ Extraction complete" 
     
     def clear():
         return None, "", "Ready"

@@ -115,7 +115,7 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
         eval_steps=100,     
         logging_steps=100,
         save_strategy="steps",
-        save_steps=100,     
+        save_steps=1000,     
 
         load_best_model_at_end=True,
         metric_for_best_model="eval_bleu",
@@ -135,7 +135,7 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=CustomCollator(processor),
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
         processing_class=processor
     )
 
