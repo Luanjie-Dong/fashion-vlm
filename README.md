@@ -1,4 +1,4 @@
-# 👗 VLM Fashion Attribute Extractor
+# VLM Fashion Attributes Extractor
 ![Fashion Example](./images/gradio-example.png)
 
 ## Overview
