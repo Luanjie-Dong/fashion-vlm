@@ -8,7 +8,9 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
 | Feature | Description | Status |
 |---------|-------------|--------|
 | **VLM Attribute Extraction** | Extracts a structured, granular list of fashion attributes (e.g., `dress: a-line, floral, midi`) from input images using a fine-tuned **PaliGemma** model. | ✅ Completed      |
-| **Semantic Fashion Search**  | Uses generated embeddings to power semantic similarity search—enabling retrieval of visually and textually similar items based on extracted attributes. | 🚧 In Progress    |
+| **Gradio Frontend** | Provides a user‑friendly interface where users can upload any fashion image and instantly view the extracted attributes. | ✅ Completed |
+| **Semantic Fashion Search** | Utilizes the generated embeddings to power a similarity search that retrieves visually and textually similar items based on the extracted attributes. | 🚧 In Progress |
+
 
 
 ## Technical Implementations
@@ -18,34 +20,44 @@ This project leverages a fine-tuned Vision-Language Model (VLM) to automatically
      ```text
     <image> Describe all garments and their attributes in this image.
     ```
-    - Implemented a custom Dataset and DataLoader to efficiently batch and encode multimodal inputs (images + text prompts) and corresponding labels.
-- **VLM Finetuning** - [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/train.py)
-    - Fine-tuned google/paligemma2-3b-pt-224 for fashion attribute extraction.
-    - Applied LoRA (Low-Rank Adaptation) for parameter-efficient training on a single GPU.
-    - Utilized a FlashAttention-enabled version of PaliGemma to accelerate training and reduce memory overhead.
+    - Built a custom `Dataset` and `DataLoader` that efficiently batch and encode multimodal inputs (images + text prompts) together with their labels.
+- **VLM Fine‑Tuning** – [View Code](https://github.com/Luanjie-Dong/fashion-recommender/blob/main/src/training/train.py)
+  - Fine‑tuned the `google/paligemma2-3b-pt-224` model on 34 k fashion images for attribute extraction.  
+  - Employed LoRA (Low‑Rank Adaptation) for parameter‑efficient training on a single GPU.  
+  - Leveraged a FlashAttention‑enabled version of PaliGemma to accelerate both training and inference.
 
 
+## Running the Application
+Follow these steps to launch the project locally:
 
+1. **Clone the repository**  
+   ```bash
+   git clone https://github.com/Luanjie-Dong/fashion-vlm.git
+   cd fashion-vlm
+   ```
 
-<!-- ## Implementation Phases
-- Phase 1: Build Foundation
-    - Implement Feature 1 with BLIP-2 or FashionCLIP
-    - Create vector database with item embeddings
-    - Basic similar-item recommendations
-    - Dataset
-        - Deepfashion 2
+2. **Create a virtual environment and install dependencies**  
+   ```bash
+   python -m venv venv
+   source venv/bin/activate        # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-- Phase 2: Add Intelligence
-    - Build graph structure with category compatibility rules
-    - Implement user profile from liked items
-    - Combine vector + graph search
-    - Dataset
-        - polyvore dataset
+3. **Launch the Gradio frontend**  
+   ```bash
+   python display.py
+   ```
+   Open the provided URL to upload a photo and view the extracted attributes.
 
-- Phase 3: Advanced Features
-    - Train compatibility model on outfit data
-    - Add style-based personalization
-    - Optimize ranking with diversity -->
+## Future Development
+- Complete the **Semantic Fashion Search** pipeline, integrating the generated embeddings with a retrieval engine.
+- Optimize inference latency on edge devices via quantization or efficient model variants.
+
+## Contributors
+
+<a href="https://github.com/Luanjie-Dong/fashion-vlm/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Luanjie-Dong/fashion-vlm" />
+</a>
 
 # References 
 - hugging face paligemma finetuning example - https://github.com/huggingface/notebooks/tree/main/examples/paligemma

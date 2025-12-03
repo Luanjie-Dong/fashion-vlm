@@ -17,7 +17,6 @@ def evaluate(model, processor, test_dataset, device="cuda"):
     smoothie = SmoothingFunction().method4
     bleu_scores = []
 
-    PROMPT = "<image> Describe all garments and their attributes in this image."
     test_dataloader = DataLoader(test_dataset,collate_fn=partial(eval_collate_fn, processor=processor),batch_size=2,shuffle=True)
     print(f"Starting evaluation on {len(test_dataloader)} batches... \n")
 

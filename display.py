@@ -7,51 +7,82 @@ from peft import PeftModel
 # -------------------------------
 # Load the LoRA-finetuned model
 # -------------------------------
-BASE_MODEL = "google/paligemma2-3b-pt-224"
+MODEL_BASE = "google/paligemma2-3b-pt-224"
 LORA_PATH = "models/paligemma-fashion" 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
 model = PaliGemmaForConditionalGeneration.from_pretrained(
-    BASE_MODEL, torch_dtype=torch.bfloat16
-)
-# model = PeftModel.from_pretrained(model, LORA_PATH)
-# model.to(device)
-# model.eval()
+        MODEL_BASE,
+        dtype=torch.bfloat16,
+        device_map="auto",
+        attn_implementation="flash_attention_2",
+    )
 
-processor = AutoProcessor.from_pretrained(BASE_MODEL)
+model = PeftModel.from_pretrained(model, LORA_PATH)
+processor = AutoProcessor.from_pretrained(MODEL_BASE,use_fast=True)
 
-# -------------------------------
-# Gradio prediction function
-# -------------------------------
-def generate_caption(image: Image, prompt: str = "Describe all garments and their attributes in this image.") -> str:
-    """
-    Takes an image and optional prompt, returns generated caption.
-    """
-    model_input = processor(
-        images=[image],
-        text=[f"<image>{prompt}\n"],
-        padding="max_length",
-        truncation=True,
-        max_length=2048,
-        return_tensors="pt"
-    ).to(device)
 
-    output_ids = model.generate(**model_input, max_length=256)
-    caption = processor.batch_decode(output_ids, skip_special_tokens=True)[0]
-    return caption
+
+def extract_attribute(image, prompt="Describe all garments and their attributes in this image."):
+    model.eval()
+    
+    print('Extracting attribute of fashion image!')
+    with torch.no_grad():
+        formatted_prompt = f"<image>{prompt}"
+        
+        model_input = processor(
+            images=[image],
+            text=[formatted_prompt], 
+            return_tensors="pt"
+        ).to(model.device)
+        
+        generation_config = {
+            'max_new_tokens': 50,     
+            'num_beams': 1,             
+            'do_sample': False,         
+            'pad_token_id': processor.tokenizer.pad_token_id,
+            'eos_token_id': processor.tokenizer.eos_token_id,
+            'use_cache': True,
+            'output_scores': False,     
+        }
+
+
+
+        output_ids = model.generate(**model_input, **generation_config)
+        result = processor.decode(output_ids[0], skip_special_tokens=True)
+        result = result.replace(prompt, "").strip()
+        
+        return result
 
 # -------------------------------
 # Gradio interface
 # -------------------------------
-iface = gr.Interface(
-    fn=generate_caption,
-    inputs=[
-        gr.Image(type="pil", label="Upload Fashion Image"),
-        gr.Textbox(lines=2, placeholder="Prompt (optional)", label="Prompt")
-    ],
-    outputs=gr.Textbox(label="Generated Caption"),
-    title="Fashion VLM (PaliGemma + LoRA)",
-    description="Upload an image of fashion items and get detailed captions describing garments and attributes."
-)
+with gr.Blocks(title="Fashion VLM - Clothing Analyzer") as demo:
+    gr.Markdown("# 👗 Fashion VLM - Clothing Analyzer")
+    gr.Markdown("Upload a fashion image to get detailed analysis of fashion item attributes!")
 
-iface.launch()
+    with gr.Row():
+        input_image = gr.Image(
+            type="pil", 
+            label="📷 Upload Fashion Image",
+            scale=1
+        )
+        
+        output_textbox = gr.Textbox(
+            label="🧥 Fashion Analysis",
+            scale=1,
+            lines=10 
+        )
+
+    # Attach the function to the components
+    input_image.change(
+        fn=extract_attribute,
+        inputs=input_image,
+        outputs=output_textbox
+    )
+
+if __name__ == "__main__":
+    demo.launch(
+        share=False,
+        server_name="127.0.0.1",
+        server_port=7860,
+        debug=True,
+    )

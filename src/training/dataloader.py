@@ -46,6 +46,7 @@ def train_collate_fn(examples,processor,max_length=512):
     batch = processor(images=images,text=prompts, suffix=labels, padding=True,     
         truncation="only_second", max_length=max_length,return_tensors="pt")
     
+    batch['answers'] = labels
     return batch
 
 
@@ -69,7 +70,7 @@ def load_dataset():
     val_df, test_df = train_test_split(temp_df,test_size=0.5,random_state=42,shuffle=False)
 
     #reduce size of val and test for faster training & eval on a single gpu
-    val_df = val_df.sample(n=100,random_state=42)
+    val_df = val_df.sample(n=10,random_state=42)
     test_df = test_df.sample(n=10,random_state=42)
 
     train_dataset , val_dataset , test_dataset = FashionDataset(train_df,img_dir), FashionDataset(val_df,img_dir), FashionDataset(test_df,img_dir)
@@ -82,4 +83,3 @@ def load_dataset():
         FashionDataset(val_df, img_dir),
         FashionDataset(test_df, img_dir),
     )
-

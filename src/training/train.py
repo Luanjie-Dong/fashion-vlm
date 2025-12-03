@@ -4,7 +4,62 @@ import torch.nn as nn
 from dataloader import load_dataset, CustomCollator
 from functools import partial
 from peft import get_peft_model, LoraConfig
+import evaluate
+from tqdm import tqdm
 
+class FashionTrainer(Trainer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.eval_metric = evaluate.load("bleu")
+
+    def evaluate(self, eval_dataset=None, ignore_keys=None):
+        eval_dataloader = self.get_eval_dataloader(eval_dataset)
+
+        self.model.eval()
+        all_predictions = []
+        all_references = []
+
+        with torch.no_grad():
+            for batch in tqdm(eval_dataloader):
+                batch = self._prepare_inputs(batch)
+                
+                generated_ids = self.model.generate(
+                    input_ids=batch["input_ids"],
+                    attention_mask=batch["attention_mask"],
+                    pixel_values=batch["pixel_values"],
+                    max_new_tokens=512,
+                    use_cache=True,     
+                    pad_token_id=self.processing_class.tokenizer.pad_token_id,
+                    eos_token_id=self.processing_class.tokenizer.eos_token_id,
+                )
+                
+                predictions = self.processing_class.batch_decode(
+                    generated_ids, 
+                    skip_special_tokens=True
+                )
+                
+                
+                references = batch['answers']
+                
+                predictions = [p.strip() for p in predictions]
+                references = [[r.strip()] for r in references]
+                
+                all_predictions.extend(predictions)
+                all_references.extend(references)
+        
+        bleu_result = self.eval_metric.compute(
+            predictions=all_predictions,
+            references=all_references
+        )
+        
+        metrics = {
+            f"eval_bleu": bleu_result["bleu"],
+        }
+        
+        self.log(metrics)
+        print(f"BLEU Score: {bleu_result['bleu']:.4f}")
+        return metrics
 
 
 def check_cuda():
@@ -63,8 +118,8 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
         save_steps=100,     
 
         load_best_model_at_end=True,
-        metric_for_best_model="eval_loss",
-        greater_is_better=False,
+        metric_for_best_model="eval_bleu",
+        greater_is_better=True,
 
         bf16=True,
         dataloader_num_workers=8,
@@ -74,13 +129,14 @@ def train_model(model_type='google/paligemma2-3b-pt-224'):
     )
 
 
-    trainer = Trainer(
+    trainer = FashionTrainer(
         model=model,
         args=args,
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=CustomCollator(processor),
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+        processing_class=processor
     )
 
     trainer.train()
